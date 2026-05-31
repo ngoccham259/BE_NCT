@@ -41,6 +41,9 @@
             android:name=".DangKyActivity"
             android:exported="false" />
         <activity
+            android:name=".DangNhapActivity"
+            android:exported="false" />
+        <activity
             android:name=".AdminActivity"
             android:exported="false" />
     </application>

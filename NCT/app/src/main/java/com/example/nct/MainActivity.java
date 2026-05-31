@@ -14,10 +14,8 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ShareActionProvider;
-import android.widget.TableLayout;
-import android.widget.Toast;
 
+import android.widget.Toast;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -25,9 +23,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import androidx.activity.EdgeToEdge;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.IntentSenderRequest;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -39,17 +34,12 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
-import androidx.viewpager2.widget.ViewPager2;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
+
 
 import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
-
-import java.net.URL;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
@@ -256,46 +246,81 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         return tempAudioList;
     }
-    private final ActivityResultLauncher<IntentSenderRequest> deleteLauncher =
-            registerForActivityResult(
-                    new ActivityResultContracts.StartIntentSenderForResult(),
-                    result -> {
-                        if (result.getResultCode() == RESULT_OK) {
-                            // Kiểm tra null trước khi thực hiện cập nhật UI
-                            if (musicFiles != null && musicAdapter != null) {
-                                musicFiles.remove(deletePosition);
-                                musicAdapter.notifyItemRemoved(deletePosition);
-                                musicAdapter.notifyItemRangeChanged(deletePosition, musicFiles.size());
-                                Toast.makeText(this, "Đã xóa bài hát", Toast.LENGTH_SHORT).show();
-                            }
-                        } else {
-                            Toast.makeText(this, "Đã hủy xóa", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+//    private final ActivityResultLauncher<IntentSenderRequest> deleteLauncher =
+//            registerForActivityResult(
+//                    new StartIntentSenderForResult(),
+//                    result -> {
+//                        if (result.getResultCode() == RESULT_OK) {
+//
+//                            if (musicFiles != null && musicAdapter != null) {
+//                                musicFiles.remove(deletePosition);
+//                                musicAdapter.notifyItemRemoved(deletePosition);
+//                                musicAdapter.notifyItemRangeChanged(deletePosition, musicFiles.size());
+//                                Toast.makeText(this, "Đã xóa bài hát", Toast.LENGTH_SHORT).show();
+//                            }
+//                        } else {
+//                            Toast.makeText(this, "Đã hủy xóa", Toast.LENGTH_SHORT).show();
+//                        }
+//                    });
 
     public void deleteSong(Uri uri, int position) {
         deleteUri = uri;
         deletePosition = position;
         try {
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                PendingIntent pendingIntent = MediaStore.createDeleteRequest(
-                        getContentResolver(),
-                        java.util.Collections.singletonList(uri)
+
+                PendingIntent pendingIntent =
+                        MediaStore.createDeleteRequest(
+                                getContentResolver(),
+                                java.util.Collections.singletonList(uri)
+                        );
+                startIntentSenderForResult(
+                        pendingIntent.getIntentSender(), 123, null, 0, 0, 0, null
                 );
-                IntentSenderRequest request = new IntentSenderRequest.Builder(
-                        pendingIntent.getIntentSender()
-                ).build();
-                deleteLauncher.launch(request);
             } else {
+
                 getContentResolver().delete(uri, null, null);
-                if (musicAdapter != null) { // Thêm kiểm tra null
+
+                if (musicAdapter != null) {
                     musicFiles.remove(position);
                     musicAdapter.notifyItemRemoved(position);
-                    musicAdapter.notifyItemRangeChanged(position, musicFiles.size());
+                    musicAdapter.notifyItemRangeChanged(
+                            position,
+                            musicFiles.size()
+                    );
                 }
+
+                Toast.makeText(this,
+                        "Đã xóa bài hát",
+                        Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
-            Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this,
+                    "Lỗi: " + e.getMessage(),
+                    Toast.LENGTH_LONG).show();
+        }
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 123) {
+            if (resultCode == RESULT_OK) {
+                if (musicFiles != null
+                        && musicAdapter != null) {
+                    musicFiles.remove(deletePosition);
+                    musicAdapter.notifyItemRemoved(deletePosition);
+                    musicAdapter.notifyItemRangeChanged(deletePosition, musicFiles.size()
+                    );
+                    Toast.makeText(this,
+                            "Đã xóa bài hát",
+                            Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(this,
+                        "Đã hủy xóa",
+                        Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -335,8 +360,9 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         SharedPreferences.Editor editor = getSharedPreferences(MY_SORT_PREF,MODE_PRIVATE).edit();
         int id = item.getItemId();
+
         if (id == R.id.admin_panel) {
-            Intent intent = new Intent(MainActivity.this, AdminActivity.class);
+            Intent intent = new Intent(MainActivity.this, DangNhapActivity.class);
             startActivity(intent);
             return true;
         }

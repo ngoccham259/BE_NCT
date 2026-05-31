@@ -166,27 +166,22 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private void nextBtnClicked() {
-
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.release();
+            mediaPlayer = null; // Quan trọng: Set null sau khi release
         }
 
-        if (repeatBoolean) {
-
-            // giữ nguyên bài
-
-        } else if (shuffleBoolean) {
-
+        if (shuffleBoolean && !repeatBoolean) {
             position = getRandom(listSongs.size() - 1);
-
-        } else {
-
+        } else if (!shuffleBoolean && !repeatBoolean) {
             position = (position + 1) % listSongs.size();
         }
+        // Nếu repeatBoolean = true, position giữ nguyên
 
         updatePlayer();
     }
+
 
     private int getRandom(int i) {
         Random random = new Random();
@@ -198,25 +193,53 @@ public class PlayerActivity extends AppCompatActivity {
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.release();
+            mediaPlayer = null;
         }
 
-        uri = Uri.parse(listSongs.get(position).getFileUrl());
-        mediaPlayer = MediaPlayer.create(getApplicationContext(), uri);
+        // 1. Lấy đúng đường dẫn (Online dùng FileUrl, Local dùng Path)
+        String path;
+        String sender = getIntent().getStringExtra("sender");
 
-        if (mediaPlayer != null) {
-            song_name.setText(listSongs.get(position).getTitle());
-            artist_name.setText(listSongs.get(position).getArtist());
+        if (sender != null && sender.equals("online")) {
+            path = listSongs.get(position).getFileUrl();
+        } else {
+            path = listSongs.get(position).getPath();
+        }
 
-            // CẬP NHẬT Ở ĐÂY:
-            int totalDuration = mediaPlayer.getDuration() / 1000;
-            seekBar.setMax(totalDuration);
-            duration_total.setText(formattedTime(totalDuration)); // Hiển thị thời gian thật của bài hát
+        if (path == null || path.isEmpty()) {
+            Toast.makeText(this, "Không thể lấy đường dẫn bài hát tiếp theo", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-            MetaData(uri);
-            playPauseBtn.setImageResource(R.drawable.ic_pause);
-            mediaPlayer.start();
+        uri = Uri.parse(path);
+
+        try {
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setDataSource(this, uri);
+            mediaPlayer.prepareAsync(); // Dùng không đồng bộ để tránh treo máy khi load nhạc online
+
+            mediaPlayer.setOnPreparedListener(mp -> {
+                mp.start();
+
+                // Cập nhật giao diện
+                song_name.setText(listSongs.get(position).getTitle());
+                artist_name.setText(listSongs.get(position).getArtist());
+
+                int totalDuration = mp.getDuration() / 1000;
+                seekBar.setMax(totalDuration);
+                duration_total.setText(formattedTime(totalDuration));
+
+                playPauseBtn.setImageResource(R.drawable.ic_pause);
+
+                // Cập nhật màu sắc Gradient
+                MetaData(uri);
+            });
 
             mediaPlayer.setOnCompletionListener(mp -> nextBtnClicked());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Lỗi khi chuyển bài: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -237,26 +260,16 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private void prevBtnClicked() {
-
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.release();
+            mediaPlayer = null;
         }
 
-        if (repeatBoolean) {
-
-            // giữ nguyên bài
-
-        } else if (shuffleBoolean) {
-
+        if (shuffleBoolean && !repeatBoolean) {
             position = getRandom(listSongs.size() - 1);
-
-        } else {
-
-            position =
-                    ((position - 1) < 0)
-                            ? (listSongs.size() - 1)
-                            : (position - 1);
+        } else if (!shuffleBoolean && !repeatBoolean) {
+            position = ((position - 1) < 0) ? (listSongs.size() - 1) : (position - 1);
         }
 
         updatePlayer();
@@ -419,49 +432,53 @@ public class PlayerActivity extends AppCompatActivity {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {
             retriever.setDataSource(this, uri);
-
             byte[] art = retriever.getEmbeddedPicture();
             Bitmap bitmap;
 
             if (art != null) {
-                Glide.with(this).asBitmap().load(art).into(cover_art);
+                // Trường hợp CÓ ảnh bìa
                 bitmap = BitmapFactory.decodeByteArray(art, 0, art.length);
-                Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
-                    @Override
-                    public void onGenerated(@Nullable Palette palette) {
-                        Palette.Swatch swatch = palette.getDominantSwatch();
-                        if (swatch != null) {
-                            ImageView gredient = findViewById(R.id.imgViewGredient);
-                            RelativeLayout mContainer = findViewById(R.id.mContainer);
-                            gredient.setBackgroundResource(R.drawable.gredient_bg);
-                            mContainer.setBackgroundResource(R.drawable.main_bg);
-                            GradientDrawable gradientDrawable = new GradientDrawable(
-                                    GradientDrawable.Orientation.BOTTOM_TOP,
-                                    new int[]{swatch.getRgb(), 0x00000000});
-                            gredient.setBackground(gradientDrawable);
-                            GradientDrawable gradientDrawableBg = new GradientDrawable(
-                                    GradientDrawable.Orientation.BOTTOM_TOP,
-                                    new int[]{swatch.getRgb(), swatch.getRgb()});
-                            mContainer.setBackground(gradientDrawableBg);
-
-
-                            song_name.setTextColor(swatch.getTitleTextColor());
-                            artist_name.setTextColor(swatch.getBodyTextColor());
-                        }
-                    }
-                });
+                Glide.with(this).asBitmap().load(art).into(cover_art);
             } else {
+                // Trường hợp KHÔNG có ảnh bìa (Dùng logo)
+                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.nct_logo);
                 Glide.with(this).asBitmap().load(R.drawable.nct_logo).into(cover_art);
-
-                ImageView gredient = findViewById(R.id.imgViewGredient);
-                RelativeLayout mContainer = findViewById(R.id.mContainer);
-
-                gredient.setBackgroundResource(R.drawable.gredient_bg);
-                mContainer.setBackgroundResource(R.drawable.main_bg);
-
-                song_name.setTextColor(Color.WHITE);
-                artist_name.setTextColor(Color.GRAY);
             }
+
+            // DÙ CÓ ẢNH HAY KHÔNG, ĐỀU CHẠY PALETTE ĐỂ TẠO GRADIENT
+            Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
+                @Override
+                public void onGenerated(@Nullable Palette palette) {
+                    Palette.Swatch swatch = palette.getDominantSwatch();
+                    ImageView gredient = findViewById(R.id.imgViewGredient);
+                    RelativeLayout mContainer = findViewById(R.id.mContainer);
+
+                    int color;
+                    if (swatch != null) {
+                        color = swatch.getRgb();
+                    } else {
+                        color = Color.parseColor("#121212"); // Màu mặc định nếu không lấy được màu từ ảnh
+                    }
+
+                    // 1. Tạo Gradient làm mờ giữa ảnh và tên bài (Trong suốt -> Màu chủ đạo)
+                    GradientDrawable gradientDrawable = new GradientDrawable(
+                            GradientDrawable.Orientation.TOP_BOTTOM,
+                            new int[]{0x00000000, color});
+                    gredient.setBackground(gradientDrawable);
+
+                    // 2. Đặt nền phía dưới trùng với màu cuối của Gradient
+                    mContainer.setBackgroundColor(color);
+
+                    // 3. Đổi màu chữ cho phù hợp
+                    if (swatch != null) {
+                        song_name.setTextColor(swatch.getTitleTextColor());
+                        artist_name.setTextColor(swatch.getBodyTextColor());
+                    } else {
+                        song_name.setTextColor(Color.WHITE);
+                        artist_name.setTextColor(Color.LTGRAY);
+                    }
+                }
+            });
             retriever.release();
         } catch (Exception e) {
             e.printStackTrace();
