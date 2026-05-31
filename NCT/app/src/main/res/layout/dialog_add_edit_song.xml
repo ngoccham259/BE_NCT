@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@android:color/black">
 
     <TextView
         android:id="@+id/tv_dialog_title"
@@ -12,6 +13,7 @@
         android:text="Quản lý nhạc Cloud"
         android:textSize="20sp"
         android:textStyle="bold"
+        android:textColor="@android:color/white"
         android:layout_marginBottom="16dp"/>
 
     <EditText
@@ -19,7 +21,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Tên bài hát (Title)"
-        android:inputType="text"/>
+        android:inputType="text"
+        android:textColor="@android:color/white"
+        android:textColorHint="@android:color/darker_gray"
+        android:backgroundTint="@android:color/white"/>
 
     <EditText
         android:id="@+id/et_song_artist"
@@ -27,6 +32,9 @@
         android:layout_height="wrap_content"
         android:hint="Ca sĩ (Artist)"
         android:inputType="text"
+        android:textColor="@android:color/white"
+        android:textColorHint="@android:color/darker_gray"
+        android:backgroundTint="@android:color/white"
         android:layout_marginTop="8dp"/>
 
     <EditText
@@ -35,6 +43,9 @@
         android:layout_height="wrap_content"
         android:hint="Album"
         android:inputType="text"
+        android:textColor="@android:color/white"
+        android:textColorHint="@android:color/darker_gray"
+        android:backgroundTint="@android:color/white"
         android:layout_marginTop="8dp"/>
 
     <!-- Ô QUAN TRỌNG NHẤT: NHẬP LINK NHẠC -->
@@ -44,6 +55,9 @@
         android:layout_height="wrap_content"
         android:hint="Link file nhạc (.mp3)"
         android:inputType="textUri"
+        android:textColor="@android:color/white"
+        android:textColorHint="@android:color/darker_gray"
+        android:backgroundTint="@android:color/white"
         android:layout_marginTop="8dp"/>
 
     <LinearLayout
@@ -58,13 +72,15 @@
             style="?attr/borderlessButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Hủy" />
+            android:text="Hủy"
+            android:textColor="@android:color/white"/>
 
         <Button
             android:id="@+id/btn_save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Lưu lên Cloud"
+            android:textColor="@android:color/white"
             android:layout_marginStart="8dp"/>
     </LinearLayout>
 </LinearLayout>

@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="176dp"
-    android:background="#673AB7"
+    android:background="#00897B"
     android:gravity="bottom"
     android:orientation="vertical"
     android:padding="16dp"
@@ -19,10 +19,12 @@
         android:paddingTop="8dp"
         android:text="Admin"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="@android:color/white"
         android:textStyle="bold" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="admin@gmail.com" />
+        android:text="admin@gmail.com"
+        android:textColor="@android:color/white" />
 </LinearLayout>
