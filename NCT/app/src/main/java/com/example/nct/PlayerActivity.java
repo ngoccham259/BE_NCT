@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -31,6 +32,11 @@ import androidx.palette.graphics.Palette;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -46,6 +52,9 @@ public class PlayerActivity extends AppCompatActivity {
     static MediaPlayer mediaPlayer;
     private Handler handler = new Handler();
     private  Thread playThread, prevThread, nextThread;
+    ImageView favoriteBtn;
+    DatabaseReference favoriteRef;
+    boolean isFav = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,10 +125,26 @@ public class PlayerActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        // Gán sự kiện click đơn giản, không cần dùng Thread riêng cho Button
+
         playPauseBtn.setOnClickListener(v -> playPauseBtnClicked());
         nextBtn.setOnClickListener(v -> nextBtnClicked());
         backBtn.setOnClickListener(v -> prevBtnClicked());
+        favoriteBtn.setOnClickListener(v -> {
+            if (MainActivity.currentUser == null) {
+                Toast.makeText(this, "Hãy đăng nhập để yêu thích bài hát!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            MusicFiles currentSong = listSongs.get(position);
+
+            if (isFav) {
+                favoriteRef.removeValue().addOnSuccessListener(aVoid ->
+                        Toast.makeText(PlayerActivity.this, "Đã xóa khỏi yêu thích", Toast.LENGTH_SHORT).show());
+            } else {
+                favoriteRef.setValue(currentSong).addOnSuccessListener(aVoid ->
+                        Toast.makeText(PlayerActivity.this, "Đã thêm vào yêu thích", Toast.LENGTH_SHORT).show());
+            }
+        });
     }
 
     private void playThreadBtn() {
@@ -230,9 +255,8 @@ public class PlayerActivity extends AppCompatActivity {
                 duration_total.setText(formattedTime(totalDuration));
 
                 playPauseBtn.setImageResource(R.drawable.ic_pause);
-
-                // Cập nhật màu sắc Gradient
                 MetaData(uri);
+                checkIsFavorite(listSongs.get(position));
             });
 
             mediaPlayer.setOnCompletionListener(mp -> nextBtnClicked());
@@ -424,6 +448,7 @@ public class PlayerActivity extends AppCompatActivity {
         repeatBtn = findViewById(R.id.id_repeat);
         playPauseBtn = findViewById(R.id.play_pause);
         seekBar = findViewById(R.id.seekBar);
+        favoriteBtn = findViewById(R.id.id_favorite);
 
 
     }
@@ -483,5 +508,30 @@ public class PlayerActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    private void checkIsFavorite(MusicFiles song) {
+        if (MainActivity.currentUser == null) return;
+
+        // Đường dẫn: favorites -> userId -> songId
+        favoriteRef = FirebaseDatabase.getInstance().getReference("favorites")
+                .child(String.valueOf(MainActivity.currentUser.getId()))
+                .child(String.valueOf(song.getId()));
+
+        // Lắng nghe sự thay đổi trạng thái
+        favoriteRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    favoriteBtn.setImageResource(R.drawable.favorite);
+                    isFav = true;
+                } else {
+                    favoriteBtn.setImageResource(R.drawable.favorite_borde);
+                    isFav = false;
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
     }
 }

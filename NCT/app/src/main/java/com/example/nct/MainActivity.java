@@ -52,6 +52,9 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     static ArrayList<MusicFiles> albums=new ArrayList<>();
     public static ArrayList<MusicFiles> onlineMusicFiles = new ArrayList<>();
     private String MY_SORT_PREF = "SortOrder";
+    public static User currentUser;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -242,6 +245,19 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             }
 
             cursor.close();
+            MusicFiles favoriteAlbum = new MusicFiles();
+            favoriteAlbum.setAlbum("Yêu thích");
+            favoriteAlbum.setArtist("Của bạn");
+            favoriteAlbum.setPath("firebase");
+
+            boolean isExist = false;
+            for (MusicFiles f : albums) {
+                if (f.getAlbum().equals("Yêu thích")) {
+                    isExist = true;
+                    break;
+                }
+            }
+
         }
 
         return tempAudioList;

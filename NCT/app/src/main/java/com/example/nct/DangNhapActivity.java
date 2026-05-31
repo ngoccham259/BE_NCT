@@ -52,6 +52,7 @@ public class DangNhapActivity extends AppCompatActivity {
                                         startActivity(new Intent(DangNhapActivity.this, MainActivity.class));
                                     }
                                     finish();
+                                    MainActivity.currentUser = user;
                                     return;
                                 }
                             }
