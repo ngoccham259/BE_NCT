@@ -61,46 +61,50 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MyViewHolder
         return new MyViewHolder(view);
     }
 
+
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        // 1. Hiển thị dữ liệu bài hát
-        holder.file_name.setText(mfiles.get(position).getTitle());
-        byte[] image = getAlbumArt(mfiles.get(position).getFileUrl());
-        if (image != null) {
-            Glide.with(mContext).asBitmap().load(image).into(holder.album_art);
+        MusicFiles musicFile = mfiles.get(position);
+
+        holder.file_name.setText(musicFile.getTitle());
+
+        if ("online".equals(sender)) {
+            Glide.with(mContext)
+                    .load(musicFile.getFileUrl())
+                    .placeholder(R.drawable.nct_logo)
+                    .error(R.drawable.nct_logo)
+                    .centerCrop()
+                    .into(holder.album_art);
         } else {
-            Glide.with(mContext).load(R.drawable.nct_logo).into(holder.album_art);
+            Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
+            Uri albumArtUri = android.content.ContentUris.withAppendedId(sArtworkUri, musicFile.getAlbumId());
+
+            Glide.with(mContext)
+                    .load(albumArtUri)
+                    .placeholder(R.drawable.nct_logo)
+                    .error(R.drawable.nct_logo)
+                    .centerCrop()
+                    .into(holder.album_art);
         }
 
-        // 2. Click để mở trình chơi nhạc
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(mContext, PlayerActivity.class);
-                intent.putExtra("position", holder.getAdapterPosition());
-                intent.putExtra("sender", sender);
-                mContext.startActivity(intent);
-            }
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(mContext, PlayerActivity.class);
+            intent.putExtra("position", position);
+            intent.putExtra("sender", sender);
+            mContext.startActivity(intent);
         });
 
-        // 3. Click menu More (Xóa)
-        holder.menuMore.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PopupMenu popupMenu = new PopupMenu(mContext, v);
-                popupMenu.getMenuInflater().inflate(R.menu.popup, popupMenu.getMenu());
-                popupMenu.show();
-
-                popupMenu.setOnMenuItemClickListener(item -> {
-                    if (item.getItemId() == R.id.delete) {
-                        int currentPos = holder.getAdapterPosition();
-                        Toast.makeText(mContext, "Delete Click!!", Toast.LENGTH_LONG).show();
-                        deleteFile(currentPos);
-                        return true;
-                    }
-                    return false;
-                });
-            }
+        holder.menuMore.setOnClickListener(v -> {
+            PopupMenu popupMenu = new PopupMenu(mContext, v);
+            popupMenu.getMenuInflater().inflate(R.menu.popup, popupMenu.getMenu());
+            popupMenu.show();
+            popupMenu.setOnMenuItemClickListener(item -> {
+                if (item.getItemId() == R.id.delete) {
+                    deleteFile(position);
+                    return true;
+                }
+                return false;
+            });
         });
     }
 

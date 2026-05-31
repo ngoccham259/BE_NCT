@@ -14,11 +14,12 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
-import java.util.List;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class SongAdminFragment extends Fragment implements AdminMusicAdapter.OnSongClickListener {
 
@@ -26,7 +27,7 @@ public class SongAdminFragment extends Fragment implements AdminMusicAdapter.OnS
     private AdminMusicAdapter adapter;
     private ArrayList<MusicFiles> songList = new ArrayList<>();
     private FloatingActionButton fabAdd;
-    private ApiService apiService;
+    private DatabaseReference mDatabase;
 
     @Nullable
     @Override
@@ -35,36 +36,45 @@ public class SongAdminFragment extends Fragment implements AdminMusicAdapter.OnS
 
         recyclerView = view.findViewById(R.id.rv_admin_songs);
         fabAdd = view.findViewById(R.id.fab_add_song);
-        apiService = RetrofitClient.getApiService();
+
+        // Kết nối tới node "songs" trên Firebase
+        mDatabase = FirebaseDatabase.getInstance().getReference("songs");
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Gọi dữ liệu từ Server
+        // Lắng nghe dữ liệu từ Firebase
         refreshData();
 
-        fabAdd.setOnClickListener(v -> showAddEditDialog(-1));
+        fabAdd.setOnClickListener(v -> showAddEditDialog(null));
 
         return view;
     }
 
     private void refreshData() {
-        apiService.getOnlineSongs().enqueue(new Callback<List<MusicFiles>>() {
+        mDatabase.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onResponse(Call<List<MusicFiles>> call, Response<List<MusicFiles>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    songList = new ArrayList<>(response.body());
-                    adapter = new AdminMusicAdapter(getContext(), songList, SongAdminFragment.this);
-                    recyclerView.setAdapter(adapter);
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                songList.clear();
+                for (DataSnapshot data : snapshot.getChildren()) {
+                    MusicFiles song = data.getValue(MusicFiles.class);
+                    if (song != null) {
+                        // Lưu key của Firebase vào ID để sau này dễ xóa/sửa
+                        song.setId(Long.parseLong(data.getKey()));
+                        songList.add(song);
+                    }
                 }
+                adapter = new AdminMusicAdapter(getContext(), songList, SongAdminFragment.this);
+                recyclerView.setAdapter(adapter);
             }
+
             @Override
-            public void onFailure(Call<List<MusicFiles>> call, Throwable t) {
-                Toast.makeText(getContext(), "Lỗi tải nhạc từ Server", Toast.LENGTH_SHORT).show();
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getContext(), "Lỗi Firebase: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void showAddEditDialog(int position) {
+    private void showAddEditDialog(MusicFiles selectedSong) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_add_edit_song, null);
         builder.setView(dialogView);
@@ -75,13 +85,12 @@ public class SongAdminFragment extends Fragment implements AdminMusicAdapter.OnS
         EditText etPath = dialogView.findViewById(R.id.et_song_path);
         TextView tvHeader = dialogView.findViewById(R.id.tv_dialog_title);
 
-        if (position != -1) {
-            tvHeader.setText("Sửa bài hát Online");
-            MusicFiles song = songList.get(position);
-            etTitle.setText(song.getTitle());
-            etArtist.setText(song.getArtist());
-            etAlbum.setText(song.getAlbum());
-            etPath.setText(song.getFileUrl());
+        if (selectedSong != null) {
+            tvHeader.setText("Sửa bài hát Firebase");
+            etTitle.setText(selectedSong.getTitle());
+            etArtist.setText(selectedSong.getArtist());
+            etAlbum.setText(selectedSong.getAlbum());
+            etPath.setText(selectedSong.getFileUrl());
         }
 
         AlertDialog dialog = builder.create();
@@ -90,44 +99,29 @@ public class SongAdminFragment extends Fragment implements AdminMusicAdapter.OnS
             String title = etTitle.getText().toString().trim();
             String artist = etArtist.getText().toString().trim();
             String album = etAlbum.getText().toString().trim();
-            String url = etPath.getText().toString().trim(); // Lấy từ ô nhập link
+            String url = etPath.getText().toString().trim();
+
 
             if (title.isEmpty() || url.isEmpty()) {
                 Toast.makeText(getContext(), "Vui lòng nhập Tên và Link nhạc", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            if (position == -1) {
-                // Gửi lên Spring Boot tạo bài mới
-                MusicFiles newSong = new MusicFiles(url, title, artist, album, "0", "0", true);
-                apiService.addSong(newSong).enqueue(new Callback<MusicFiles>() {
-                    @Override
-                    public void onResponse(Call<MusicFiles> call, Response<MusicFiles> response) {
-                        if (response.isSuccessful()) {
-                            Toast.makeText(getContext(), "Đã lưu vào MySQL", Toast.LENGTH_SHORT).show();
-                            refreshData(); // Hàm gọi lại getAllSongs() để cập nhật danh sách
-                        }
-                    }
-                    @Override public void onFailure(Call<MusicFiles> call, Throwable t) {}
-                });
+            if (selectedSong == null) {
+                // THÊM MỚI: Tạo một key tự động (ID)
+                String idStr = String.valueOf(System.currentTimeMillis());
+                String id = String.valueOf(System.currentTimeMillis());
+                MusicFiles newSong = new MusicFiles(Long.parseLong(id), title, artist, album, url, 0L);
+                mDatabase.child(id).setValue(newSong);
+                Toast.makeText(getContext(), "Đã thêm vào Firebase", Toast.LENGTH_SHORT).show();
             } else {
-                // Cập nhật bài cũ
-                MusicFiles song = songList.get(position);
-                song.setTitle(title);
-                song.setArtist(artist);
-                song.setAlbum(album);
-                song.setFileUrl(url);
-
-                apiService.updateSong(song.getId(), song).enqueue(new Callback<MusicFiles>() {
-                    @Override
-                    public void onResponse(Call<MusicFiles> call, Response<MusicFiles> response) {
-                        if (response.isSuccessful()) {
-                            adapter.notifyItemChanged(position);
-                            Toast.makeText(getContext(), "Cập nhật thành công", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                    @Override public void onFailure(Call<MusicFiles> call, Throwable t) {}
-                });
+                // CẬP NHẬT
+                selectedSong.setTitle(title);
+                selectedSong.setArtist(artist);
+                selectedSong.setAlbum(album);
+                selectedSong.setFileUrl(url);
+                mDatabase.child(String.valueOf(selectedSong.getId())).setValue(selectedSong);
+                Toast.makeText(getContext(), "Đã cập nhật Firebase", Toast.LENGTH_SHORT).show();
             }
             dialog.dismiss();
         });
@@ -137,17 +131,12 @@ public class SongAdminFragment extends Fragment implements AdminMusicAdapter.OnS
     @Override
     public void onDeleteClick(int position) {
         MusicFiles song = songList.get(position);
-        apiService.deleteSong(song.getId()).enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                songList.remove(position);
-                adapter.notifyItemRemoved(position);
-                Toast.makeText(getContext(), "Đã xóa khỏi Cloud", Toast.LENGTH_SHORT).show();
-            }
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {}
-        });
+        // Xóa khỏi Firebase theo ID
+        mDatabase.child(String.valueOf(song.getId())).removeValue()
+                .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Đã xóa khỏi Firebase", Toast.LENGTH_SHORT).show());
     }
 
-    @Override public void onEditClick(int position) { showAddEditDialog(position); }
+    @Override public void onEditClick(int position) {
+        showAddEditDialog(songList.get(position));
+    }
 }

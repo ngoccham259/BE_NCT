@@ -293,35 +293,27 @@ public class PlayerActivity extends AppCompatActivity {
         MetaData(uri);
     }*/
     private void getIntentMethod() {
-        // 1. Lấy vị trí bài hát được chọn
         position = getIntent().getIntExtra("position", -1);
-
-        // 2. Lấy nguồn gửi tới (Local, Album, hay Online)
         String sender = getIntent().getStringExtra("sender");
 
         if (sender != null && sender.equals("albumDetails")) {
-            // Nhạc từ Album (Local)
             listSongs = albumFiles;
         }
-        else if (sender != null && sender.equals("onlineSongs")) {
-            // Nhạc từ Cloud (MySQL/Spring Boot)
-            // Bạn cần đảm bảo đã gán dữ liệu vào onlineMusicFiles trước đó
+        else if (sender != null && sender.equals("online")) {
             listSongs = MainActivity.onlineMusicFiles;
         }
         else {
-            // Nhạc mặc định từ máy (Local Songs)
             listSongs = musicFiles;
         }
 
-        if (listSongs != null && position != -1) {
-            // Thay đổi icon sang trạng thái đang phát
-            playPauseBtn.setImageResource(R.drawable.ic_pause);
-
-            // Lấy đường dẫn (Path hoặc URL)
+        if (listSongs != null && position != -1 && position < listSongs.size()) {
             String path = listSongs.get(position).getFileUrl();
+            if (path == null) {
+                Toast.makeText(this, "Đường dẫn nhạc bị trống!", Toast.LENGTH_SHORT).show();
+                return;
+            }
             uri = Uri.parse(path);
 
-            // 3. Quản lý MediaPlayer
             if (mediaPlayer != null) {
                 mediaPlayer.stop();
                 mediaPlayer.release();
@@ -329,16 +321,17 @@ public class PlayerActivity extends AppCompatActivity {
             }
 
             try {
-                // MediaPlayer.create có thể dùng cho cả file nội bộ và URL
+
                 mediaPlayer = MediaPlayer.create(getApplicationContext(), uri);
 
                 if (mediaPlayer != null) {
                     mediaPlayer.start();
-                    // Cập nhật độ dài thanh SeekBar
+
                     seekBar.setMax(mediaPlayer.getDuration() / 1000);
                 } else {
-                    // Trường hợp URL bị lỗi hoặc không có mạng
+
                     Toast.makeText(this, "Không thể tải bài hát. Vui lòng kiểm tra kết nối mạng.", Toast.LENGTH_SHORT).show();
+                    finish();
                 }
             } catch (Exception e) {
                 e.printStackTrace();

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,28 +37,29 @@ public class AlbumDetailsAdapter extends RecyclerView.Adapter<AlbumDetailsAdapte
 
     @Override
     public void onBindViewHolder(@NonNull MyHolder holder, @SuppressLint("RecyclerView") int position) {
-        holder.album_name.setText(albumFiles.get(position).getTitle());
-        byte[] image = getAlbumArt(albumFiles.get(position).getFileUrl());
-        if (image != null) {
-            Glide.with(mContext).asBitmap()
-                    .load(image)
-                    .into(holder.album_image);
-        } else {
-            Glide.with(mContext)
-                    .load(R.drawable.nct_logo)
-                    .into(holder.album_image);
-        }
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(mContext, PlayerActivity.class);
-                intent.putExtra("sender","albumDetails");
-                intent.putExtra("position", position);
-                mContext.startActivity(intent);
+        MusicFiles songInAlbum = albumFiles.get(position);
 
-            }
+        // Hiển thị tên bài hát
+        holder.album_name.setText(songInAlbum.getTitle());
+
+        // Tải ảnh bìa (vì trong cùng album nên ảnh thường giống nhau)
+        Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
+        Uri albumArtUri = android.content.ContentUris.withAppendedId(sArtworkUri, songInAlbum.getAlbumId());
+
+        Glide.with(mContext)
+                .load(albumArtUri)
+                .placeholder(R.drawable.nct_logo)
+                .error(R.drawable.nct_logo)
+                .centerCrop()
+                .into(holder.album_image);
+
+        // Click để phát nhạc
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(mContext, PlayerActivity.class);
+            intent.putExtra("sender", "albumDetails");
+            intent.putExtra("position", position);
+            mContext.startActivity(intent);
         });
-
     }
 
     @Override

@@ -7,23 +7,22 @@ public class MusicFiles {
     private String artist;
     private String album;
     private String fileUrl;
+    private long albumId;
 
     public MusicFiles() {
     }
 
-    public MusicFiles(Long id,
-                      String title,
-                      String artist,
-                      String album,
-                      String fileUrl) {
+    public MusicFiles(Long id, String title, String artist, String album, String fileUrl, Long albumId) {
         this.id = id;
         this.title = title;
         this.artist = artist;
         this.album = album;
         this.fileUrl = fileUrl;
+        this.albumId=albumId;
     }
 
-    public MusicFiles(String url, String title, String artist, String album, String number, String number1, boolean b) {
+
+    public MusicFiles(String url, String title, String artist, String album, String number, String number1) {
     }
 
     public Long getId() {
@@ -64,5 +63,13 @@ public class MusicFiles {
 
     public void setFileUrl(String fileUrl) {
         this.fileUrl = fileUrl;
+    }
+
+    public long getAlbumId() {
+        return albumId;
+    }
+
+    public void setAlbumId(long albumId) {
+        this.albumId = albumId;
     }
 }

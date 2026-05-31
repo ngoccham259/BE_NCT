@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,24 +37,25 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.MyHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull MyHolder holder, @SuppressLint("RecyclerView") int position) {
-        holder.album_name.setText(albumFiles.get(position).getAlbum());
-        byte[] image = getAlbumArt(albumFiles.get(position).getFileUrl());
-        if (image != null) {
-            Glide.with(mContext).asBitmap()
-                    .load(image)
-                    .into(holder.album_image);
-        } else {
-            Glide.with(mContext)
-                    .load(R.drawable.nct_logo)
-                    .into(holder.album_image);
-        }
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(mContext, AlbumDetails.class);
-                intent.putExtra("albumName", albumFiles.get(position).getAlbum());
-                mContext.startActivity(intent);
-            }
+        MusicFiles albumFile = albumFiles.get(position);
+
+        holder.album_name.setText(albumFile.getAlbum());
+
+        Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
+        Uri albumArtUri = android.content.ContentUris.withAppendedId(sArtworkUri, albumFile.getAlbumId());
+
+        Glide.with(mContext)
+                .load(albumArtUri)
+                .placeholder(R.drawable.nct_logo)
+                .error(R.drawable.nct_logo)
+                .centerCrop()
+                .into(holder.album_image);
+
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(mContext, AlbumDetails.class);
+            intent.putExtra("albumName", albumFile.getAlbum());
+            mContext.startActivity(intent);
         });
     }
 
