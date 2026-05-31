@@ -5,19 +5,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/tv_back"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <ImageView
+        android:id="@+id/img_back"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:padding="8dp"
-        android:text="&lt;- Back"
-        android:textColor="@android:color/black"
-        android:textSize="18sp"
-        android:textStyle="bold"
+        android:src="@drawable/ic_chevron_left"
+        android:contentDescription="Back"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@android:color/black" />
 
     <EditText
         android:id="@+id/edt_name"

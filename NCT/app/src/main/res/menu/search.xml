@@ -9,7 +9,11 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:theme="@style/CustomSearchViewStyle"
         />
-    <item />
+    <item
+        android:id="@+id/admin_panel"
+        android:title="Admin"
+        android:icon="@drawable/person"
+        app:showAsAction="always" />
     <item
         android:title="Sort by"
         android:id="@+id/sort_option"

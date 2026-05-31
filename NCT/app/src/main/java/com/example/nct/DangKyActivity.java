@@ -3,6 +3,7 @@ package com.example.nct;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.database.DatabaseReference;
@@ -11,6 +12,7 @@ import com.google.firebase.database.FirebaseDatabase;
 public class DangKyActivity extends AppCompatActivity {
     private EditText edtName, edtEmail, edtPassword, edtCheck, edtPhone;
     private Button btnRegister;
+    private ImageView imgBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,10 +21,16 @@ public class DangKyActivity extends AppCompatActivity {
 
         edtName = findViewById(R.id.edt_name);
         edtEmail = findViewById(R.id.edt_email);
-        edtPhone = findViewById(R.id.edt_phone); // Đảm bảo ID này có trong layout
+        edtPhone = findViewById(R.id.edt_phone); 
         edtPassword = findViewById(R.id.edt_password);
         edtCheck = findViewById(R.id.edt_check);
         btnRegister = findViewById(R.id.button2);
+        imgBack = findViewById(R.id.img_back);
+
+        // Sự kiện click cho icon Back
+        imgBack.setOnClickListener(v -> {
+            finish(); // Quay lại trang đăng nhập (đóng Activity hiện tại)
+        });
 
         btnRegister.setOnClickListener(v -> {
             String username = edtName.getText().toString().trim();
@@ -43,7 +51,7 @@ public class DangKyActivity extends AppCompatActivity {
             int id = (int) (System.currentTimeMillis() / 1000);
             String role = "user";
 
-            // Sửa lỗi: Truyền ĐỦ 5 THAM SỐ (id, username, password, role, email)
+            // Truyền 5 tham số khớp với User.java hiện tại
             User newUser = new User(id, username, password, role, email);
 
             DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("users");

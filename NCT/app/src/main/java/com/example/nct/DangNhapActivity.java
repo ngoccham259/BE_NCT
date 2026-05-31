@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +20,7 @@ import com.google.firebase.database.ValueEventListener;
 
 public class DangNhapActivity extends AppCompatActivity {
     private EditText edtUsername, edtPassword;
+    private ImageView imgBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +30,16 @@ public class DangNhapActivity extends AppCompatActivity {
         edtUsername = findViewById(R.id.editTextText);
         edtPassword = findViewById(R.id.editTextTextPassword);
         Button btnLogin = findViewById(R.id.button);
+        imgBack = findViewById(R.id.img_back2);
+
+        imgBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(DangNhapActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
