@@ -9,31 +9,28 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class DangKyActivity extends AppCompatActivity {
-    private EditText edtName, edtEmail, edtPassword, edtCheck;
+    private EditText edtName, edtEmail, edtPassword, edtCheck, edtPhone;
     private Button btnRegister;
-    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dang_ky);
 
-        mDatabase = FirebaseDatabase.getInstance().getReference("users");
-
         edtName = findViewById(R.id.edt_name);
         edtEmail = findViewById(R.id.edt_email);
+        edtPhone = findViewById(R.id.edt_phone); // Đảm bảo ID này có trong layout
         edtPassword = findViewById(R.id.edt_password);
         edtCheck = findViewById(R.id.edt_check);
         btnRegister = findViewById(R.id.button2);
 
-
         btnRegister.setOnClickListener(v -> {
             String username = edtName.getText().toString().trim();
             String email = edtEmail.getText().toString().trim();
+            String phone = (edtPhone != null) ? edtPhone.getText().toString().trim() : "";
             String password = edtPassword.getText().toString().trim();
             String checkPass = edtCheck.getText().toString().trim();
 
-            // 1. Kiểm tra đầu vào
             if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
                 return;
@@ -43,24 +40,20 @@ public class DangKyActivity extends AppCompatActivity {
                 return;
             }
 
-            // 2. Tạo ID (Lấy timestamp làm ID để đảm bảo là số và không trùng lặp)
             int id = (int) (System.currentTimeMillis() / 1000);
-            String role = "USER"; // Mặc định là khách hàng
+            String role = "user";
 
-            // 3. Sử dụng dòng code bạn yêu cầu
+            // Sửa lỗi: Truyền ĐỦ 5 THAM SỐ (id, username, password, role, email)
             User newUser = new User(id, username, password, role, email);
 
-            // 4. Đẩy lên Firebase
             DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("users");
-
-            // Lưu vào node: users -> {id} -> {thong_tin_user}
             mDatabase.child(String.valueOf(id)).setValue(newUser)
                     .addOnSuccessListener(aVoid -> {
                         Toast.makeText(DangKyActivity.this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
-                        finish(); // Quay lại màn hình đăng nhập
+                        finish();
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(DangKyActivity.this, "Lỗi kết nối: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(DangKyActivity.this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
         });
     }
