@@ -1,37 +1,34 @@
 package com.example.nct;
 
-import com.google.gson.annotations.SerializedName;
-
 public class MusicFiles {
-    private String id;
+
+    private Long id;
     private String title;
     private String artist;
     private String album;
-
-    @SerializedName("fileUrl")
-    private String path;
-
-    private String duration;
-    private boolean isOnline;
-    public MusicFiles(String path, String title, String artist, String album, String duration, String id, boolean isOnline) {
-        this.path = path;
-        this.title = title;
-        this.artist = artist;
-        this.album = album;
-        this.duration = duration;
-        this.id = id;
-        this.isOnline = isOnline;
-    }
+    private String fileUrl;
 
     public MusicFiles() {
     }
 
-    public String getPath() {
-        return path;
+    public MusicFiles(Long id,
+                      String title,
+                      String artist,
+                      String album,
+                      String fileUrl) {
+        this.id = id;
+        this.title = title;
+        this.artist = artist;
+        this.album = album;
+        this.fileUrl = fileUrl;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -58,27 +55,11 @@ public class MusicFiles {
         this.album = album;
     }
 
-    public String getDuration() {
-        return duration;
+    public String getFileUrl() {
+        return fileUrl;
     }
 
-    public void setDuration(String duration) {
-        this.duration = duration;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public boolean isOnline() {
-        return isOnline;
-    }
-
-    public void setOnline(boolean online) {
-        isOnline = online;
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
     }
 }

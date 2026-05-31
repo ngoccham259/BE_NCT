@@ -1,0 +1,42 @@
+{
+  "users": {
+    "1": {
+      "id": 1,
+      "username": "admin",
+      "email": "admin@gmail.com",
+      "password": "123456",
+      "role": "ADMIN"
+    },
+    "2": {
+      "id": 2,
+      "username": "cham",
+      "email": "cham@gmail.com",
+      "password": "123456",
+      "role": "USER"
+    }
+  },
+
+  "songs": {
+    "1": {
+      "id": 1,
+      "title": "Nếu Lúc Đó",
+      "artist": "Bùi Trường Linh",
+      "album": "Single",
+      "fileUrl": ""
+    },
+    "2": {
+      "id": 2,
+      "title": "Yêu Người Có Ước Mơ",
+      "artist": "Bùi Trường Linh",
+      "album": "Single",
+      "fileUrl": ""
+    },
+    "3": {
+      "id": 3,
+      "title": "Đường Tôi Chở Em Về",
+      "artist": "Bùi Trường Linh",
+      "album": "Single",
+      "fileUrl": ""
+    }
+  }
+}

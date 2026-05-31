@@ -18,6 +18,12 @@ import android.widget.ShareActionProvider;
 import android.widget.TableLayout;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.IntentSenderRequest;
@@ -156,52 +162,81 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             return titles.get(position);
         }
     }
-    public ArrayList<MusicFiles> getAllAudio(Context context){
-        SharedPreferences preferences = getSharedPreferences(MY_SORT_PREF, MODE_PRIVATE);
-        String SortOrder=preferences.getString("sorting", "sortByName");
+    public ArrayList<MusicFiles> getAllAudio(Context context) {
+
+        SharedPreferences preferences =
+                getSharedPreferences(MY_SORT_PREF, MODE_PRIVATE);
+
+        String sortOrder =
+                preferences.getString("sorting", "sortByName");
+
         ArrayList<String> duplicate = new ArrayList<>();
         albums.clear();
+
         ArrayList<MusicFiles> tempAudioList = new ArrayList<>();
+
         String order = null;
+
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        if(SortOrder=="sortByName"){
+
+        if (sortOrder.equals("sortByName")) {
             order = MediaStore.MediaColumns.DISPLAY_NAME + " ASC";
-        } else if (SortOrder=="sortByDate") {
-            order = MediaStore.MediaColumns.DATE_ADDED + " ASC";
-        } else if (SortOrder=="sortBySize") {
+        }
+        else if (sortOrder.equals("sortByDate")) {
+            order = MediaStore.MediaColumns.DATE_ADDED + " DESC";
+        }
+        else if (sortOrder.equals("sortBySize")) {
             order = MediaStore.MediaColumns.SIZE + " DESC";
         }
 
-        String [] projection = {
-                MediaStore.Audio.Media.ALBUM,
+        String[] projection = {
+                MediaStore.Audio.Media._ID,
                 MediaStore.Audio.Media.TITLE,
-                MediaStore.Audio.Media.DURATION,
-                MediaStore.Audio.Media.DATA,
                 MediaStore.Audio.Media.ARTIST,
-                MediaStore.Audio.Media._ID
+                MediaStore.Audio.Media.ALBUM,
+                MediaStore.Audio.Media.DATA
         };
-        Cursor cursor = context.getContentResolver().query(uri, projection,  null, null,order);
-        if (cursor!=null)
-        {
-            while (cursor.moveToNext())
-            {
-                String album = cursor.getString(0);
+
+        Cursor cursor = context.getContentResolver().query(
+                uri,
+                projection,
+                null,
+                null,
+                order
+        );
+
+        if (cursor != null) {
+
+            while (cursor.moveToNext()) {
+
+                Long id = cursor.getLong(0);
                 String title = cursor.getString(1);
-                String duration = cursor.getString(2);
-                String path = cursor.getString(3);
-                String artist = cursor.getString(4);
-                String id = cursor.getString(5);
-                MusicFiles musicFiles = new MusicFiles(path, title, artist, album, duration,id, false);
-                Log.e("Path: "+ path, "Album: " + album);
-                tempAudioList.add(musicFiles);
-                if(!duplicate.contains(album)){
-                    albums.add(musicFiles);
+                String artist = cursor.getString(2);
+                String album = cursor.getString(3);
+                String fileUrl = cursor.getString(4);
+
+                MusicFiles music = new MusicFiles();
+
+                music.setId(id);
+                music.setTitle(title);
+                music.setArtist(artist);
+                music.setAlbum(album);
+                music.setFileUrl(fileUrl);
+
+                tempAudioList.add(music);
+
+                if (!duplicate.contains(album)) {
+                    albums.add(music);
                     duplicate.add(album);
                 }
+
+                Log.e("SONG", title + " - " + artist);
             }
+
             cursor.close();
         }
-        return  tempAudioList;
+
+        return tempAudioList;
     }
     private final ActivityResultLauncher<IntentSenderRequest> deleteLauncher =
             registerForActivityResult(
@@ -301,6 +336,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             this.recreate();
         }
         return super.onOptionsItemSelected(item);
-        }
+    }
 
 }
