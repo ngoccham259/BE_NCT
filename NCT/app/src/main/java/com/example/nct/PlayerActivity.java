@@ -112,13 +112,14 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
     }
-
     @Override
     protected void onResume() {
-        playThreadBtn();
-        nextThreadBtn();
-        prevThreadBtn();
         super.onResume();
+
+        // Gán sự kiện click đơn giản, không cần dùng Thread riêng cho Button
+        playPauseBtn.setOnClickListener(v -> playPauseBtnClicked());
+        nextBtn.setOnClickListener(v -> nextBtnClicked());
+        backBtn.setOnClickListener(v -> prevBtnClicked());
     }
 
     private void playThreadBtn() {
@@ -139,11 +140,11 @@ public class PlayerActivity extends AppCompatActivity {
 
     private void playPauseBtnClicked() {
         if (mediaPlayer.isPlaying()) {
-            playPauseBtn.setImageResource(R.drawable.ic_play_arrow);
             mediaPlayer.pause();
+            playPauseBtn.setImageResource(R.drawable.ic_play_arrow);
         } else {
-            playPauseBtn.setImageResource(R.drawable.ic_pause);
             mediaPlayer.start();
+            playPauseBtn.setImageResource(R.drawable.ic_pause);
         }
     }
 
@@ -194,17 +195,29 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private void updatePlayer() {
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+        }
+
         uri = Uri.parse(listSongs.get(position).getFileUrl());
         mediaPlayer = MediaPlayer.create(getApplicationContext(), uri);
 
-        song_name.setText(listSongs.get(position).getTitle());
-        artist_name.setText(listSongs.get(position).getArtist());
-        seekBar.setMax(mediaPlayer.getDuration() / 1000);
-        MetaData(uri);
+        if (mediaPlayer != null) {
+            song_name.setText(listSongs.get(position).getTitle());
+            artist_name.setText(listSongs.get(position).getArtist());
 
-        playPauseBtn.setImageResource(R.drawable.ic_pause);
-        mediaPlayer.start();
-        mediaPlayer.setOnCompletionListener(mp -> nextBtnClicked());
+            // CẬP NHẬT Ở ĐÂY:
+            int totalDuration = mediaPlayer.getDuration() / 1000;
+            seekBar.setMax(totalDuration);
+            duration_total.setText(formattedTime(totalDuration)); // Hiển thị thời gian thật của bài hát
+
+            MetaData(uri);
+            playPauseBtn.setImageResource(R.drawable.ic_pause);
+            mediaPlayer.start();
+
+            mediaPlayer.setOnCompletionListener(mp -> nextBtnClicked());
+        }
     }
 
     private void prevThreadBtn() {
@@ -250,16 +263,13 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private String formattedTime(int mCurrentPosition) {
-        String totalout = "";
-        String totalNew = "";
-        String seconds = String.valueOf(mCurrentPosition%60);
-        String minutes = String.valueOf(mCurrentPosition/60);
-        totalout = minutes+ ":"+seconds;
-        totalNew = minutes+ ":"+"0"+seconds;
-        if (seconds.length()==1){
-            return totalNew;
-        }else {
-            return totalout;
+        String seconds = String.valueOf(mCurrentPosition % 60);
+        String minutes = String.valueOf(mCurrentPosition / 60);
+
+        if (seconds.length() == 1) {
+            return minutes + ":0" + seconds;
+        } else {
+            return minutes + ":" + seconds;
         }
     }
 
@@ -293,55 +303,99 @@ public class PlayerActivity extends AppCompatActivity {
         MetaData(uri);
     }*/
     private void getIntentMethod() {
+
         position = getIntent().getIntExtra("position", -1);
         String sender = getIntent().getStringExtra("sender");
 
+        // Chọn danh sách nhạc
         if (sender != null && sender.equals("albumDetails")) {
+
             listSongs = albumFiles;
-        }
-        else if (sender != null && sender.equals("online")) {
+
+        } else if (sender != null && sender.equals("online")) {
+
             listSongs = MainActivity.onlineMusicFiles;
-        }
-        else {
+
+        } else {
+
             listSongs = musicFiles;
         }
 
-        if (listSongs != null && position != -1 && position < listSongs.size()) {
-            String path = listSongs.get(position).getFileUrl();
-            if (path == null) {
-                Toast.makeText(this, "Đường dẫn nhạc bị trống!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            uri = Uri.parse(path);
+        // Kiểm tra dữ liệu
+        if (listSongs == null || listSongs.size() == 0 || position == -1) {
 
-            if (mediaPlayer != null) {
-                mediaPlayer.stop();
-                mediaPlayer.release();
-                mediaPlayer = null;
-            }
-
-            try {
-
-                mediaPlayer = MediaPlayer.create(getApplicationContext(), uri);
-
-                if (mediaPlayer != null) {
-                    mediaPlayer.start();
-
-                    seekBar.setMax(mediaPlayer.getDuration() / 1000);
-                } else {
-
-                    Toast.makeText(this, "Không thể tải bài hát. Vui lòng kiểm tra kết nối mạng.", Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Toast.makeText(this, "Lỗi khi phát bài hát: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+            Toast.makeText(this, "Không tìm thấy bài hát", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
         }
 
-        // 4. Cập nhật giao diện (Tên bài, ca sĩ, ảnh bìa)
-        if (uri != null) {
-            MetaData(uri);
+        // Lấy đường dẫn nhạc
+        String path;
+
+        if (sender != null && sender.equals("online")) {
+
+            path = listSongs.get(position).getFileUrl();
+
+        } else {
+
+            path = listSongs.get(position).getPath();
+        }
+
+        // Kiểm tra path
+        if (path == null || path.isEmpty()) {
+
+            Toast.makeText(this, "Đường dẫn nhạc bị lỗi", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        uri = Uri.parse(path);
+
+        // Giải phóng player cũ
+        if (mediaPlayer != null) {
+
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+
+        try {
+
+            mediaPlayer = new MediaPlayer();
+
+            mediaPlayer.setDataSource(this, uri);
+
+            mediaPlayer.prepareAsync();
+
+            mediaPlayer.setOnPreparedListener(mp -> {
+
+                mp.start();
+
+                song_name.setText(listSongs.get(position).getTitle());
+
+                artist_name.setText(listSongs.get(position).getArtist());
+
+                int totalDuration = mp.getDuration() / 1000;
+
+                seekBar.setMax(totalDuration);
+
+                duration_total.setText(formattedTime(totalDuration));
+
+                playPauseBtn.setImageResource(R.drawable.ic_pause);
+
+                // Metadata
+                MetaData(uri);
+            });
+
+            mediaPlayer.setOnCompletionListener(mp -> nextBtnClicked());
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            Toast.makeText(this,
+                    "Lỗi phát nhạc: " + e.getMessage(),
+                    Toast.LENGTH_LONG).show();
         }
     }
 

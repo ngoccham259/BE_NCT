@@ -3,27 +3,57 @@ package com.example.nct;
 public class MusicFiles {
 
     private Long id;
+
     private String title;
+
     private String artist;
+
     private String album;
+
+    // URL cho nhạc online
     private String fileUrl;
+
+    // Đường dẫn cho nhạc offline
+    private String path;
+
     private long albumId;
 
+    // Constructor rỗng
     public MusicFiles() {
     }
 
-    public MusicFiles(Long id, String title, String artist, String album, String fileUrl, Long albumId) {
+    // Constructor cho nhạc online
+    public MusicFiles(Long id, String title, String artist, String album, String fileUrl, long albumId) {
+
         this.id = id;
         this.title = title;
         this.artist = artist;
         this.album = album;
         this.fileUrl = fileUrl;
-        this.albumId=albumId;
+        this.albumId = albumId;
+    }
+
+    public MusicFiles(String path, String title, String artist, String album, long albumId) {
+
+        this.path = path;
+        this.title = title;
+        this.artist = artist;
+        this.album = album;
+        this.albumId = albumId;
     }
 
 
-    public MusicFiles(String url, String title, String artist, String album, String number, String number1) {
+    public MusicFiles(Long id, String title, String artist, String album, String fileUrl, String path, long albumId) {
+
+        this.id = id;
+        this.title = title;
+        this.artist = artist;
+        this.album = album;
+        this.fileUrl = fileUrl;
+        this.path = path;
+        this.albumId = albumId;
     }
+
 
     public Long getId() {
         return id;
@@ -63,6 +93,14 @@ public class MusicFiles {
 
     public void setFileUrl(String fileUrl) {
         this.fileUrl = fileUrl;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public long getAlbumId() {

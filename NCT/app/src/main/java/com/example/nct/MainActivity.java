@@ -213,25 +213,38 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             while (cursor.moveToNext()) {
 
                 Long id = cursor.getLong(0);
+
                 String title = cursor.getString(1);
+
                 String artist = cursor.getString(2);
+
                 String album = cursor.getString(3);
-                String fileUrl = cursor.getString(4);
+
+                String path = cursor.getString(4);
+
                 Long albumId = cursor.getLong(5);
 
                 MusicFiles music = new MusicFiles();
 
                 music.setId(id);
+
                 music.setTitle(title);
+
                 music.setArtist(artist);
+
                 music.setAlbum(album);
-                music.setFileUrl(fileUrl);
+
+                // OFFLINE dùng PATH
+                music.setPath(path);
+
                 music.setAlbumId(albumId);
 
                 tempAudioList.add(music);
 
                 if (!duplicate.contains(album)) {
+
                     albums.add(music);
+
                     duplicate.add(album);
                 }
 
