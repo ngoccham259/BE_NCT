@@ -18,8 +18,8 @@ public interface ApiService {
     Call<MusicFiles> addSong(@Body MusicFiles song);
 
     @PUT("api/songs/{id}")
-    Call<MusicFiles> updateSong(@Path("id") String id, @Body MusicFiles song);
+    Call<MusicFiles> updateSong(@Path("id") Long id, @Body MusicFiles song);
 
     @DELETE("api/songs/{id}")
-    Call<Void> deleteSong(@Path("id") String id);
+    Call<Void> deleteSong(@Path("id") Long id);
 }

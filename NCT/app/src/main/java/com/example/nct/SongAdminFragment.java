@@ -81,7 +81,7 @@ public class SongAdminFragment extends Fragment implements AdminMusicAdapter.OnS
             etTitle.setText(song.getTitle());
             etArtist.setText(song.getArtist());
             etAlbum.setText(song.getAlbum());
-            etPath.setText(song.getPath());
+            etPath.setText(song.getFileUrl());
         }
 
         AlertDialog dialog = builder.create();
@@ -116,7 +116,7 @@ public class SongAdminFragment extends Fragment implements AdminMusicAdapter.OnS
                 song.setTitle(title);
                 song.setArtist(artist);
                 song.setAlbum(album);
-                song.setPath(url);
+                song.setFileUrl(url);
 
                 apiService.updateSong(song.getId(), song).enqueue(new Callback<MusicFiles>() {
                     @Override

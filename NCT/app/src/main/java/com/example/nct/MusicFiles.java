@@ -23,6 +23,9 @@ public class MusicFiles {
         this.fileUrl = fileUrl;
     }
 
+    public MusicFiles(String url, String title, String artist, String album, String number, String number1, boolean b) {
+    }
+
     public Long getId() {
         return id;
     }

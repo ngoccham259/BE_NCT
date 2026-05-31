@@ -69,6 +69,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         setContentView(R.layout.activity_main);
 
         permission();
+        loadOnlineSongs();
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -338,4 +340,48 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         return super.onOptionsItemSelected(item);
     }
 
+    private void loadOnlineSongs() {
+
+        Log.d("FIREBASE", "loadOnlineSongs called");
+
+        DatabaseReference ref =
+                FirebaseDatabase.getInstance()
+                        .getReference("songs");
+
+        Log.d("FIREBASE", "ref = " + ref);
+
+        ref.addValueEventListener(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                Log.d("FIREBASE", "onDataChange: " + snapshot.getChildrenCount());
+
+                onlineMusicFiles.clear();
+
+                for (DataSnapshot data : snapshot.getChildren()) {
+
+                    MusicFiles music =
+                            data.getValue(MusicFiles.class);
+
+                    if (music != null) {
+
+                        Log.d("FIREBASE",
+                                "Song: " + music.getTitle());
+
+                        onlineMusicFiles.add(music);
+                    }
+                }
+
+                Log.d("FIREBASE", "Total = " + onlineMusicFiles.size());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+                Log.e("FIREBASE",
+                        error.getMessage());
+            }
+        });
+    }
 }

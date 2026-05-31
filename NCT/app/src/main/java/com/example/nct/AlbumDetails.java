@@ -46,7 +46,7 @@ public class AlbumDetails extends AppCompatActivity {
         // Kiểm tra tránh crash
         if (albumSongs.size() > 0) {
 
-            byte[] image = getAlbumArt(albumSongs.get(0).getPath());
+            byte[] image = getAlbumArt(albumSongs.get(0).getFileUrl());
 
             if (image != null) {
 

@@ -194,7 +194,7 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private void updatePlayer() {
-        uri = Uri.parse(listSongs.get(position).getPath());
+        uri = Uri.parse(listSongs.get(position).getFileUrl());
         mediaPlayer = MediaPlayer.create(getApplicationContext(), uri);
 
         song_name.setText(listSongs.get(position).getTitle());
@@ -318,7 +318,7 @@ public class PlayerActivity extends AppCompatActivity {
             playPauseBtn.setImageResource(R.drawable.ic_pause);
 
             // Lấy đường dẫn (Path hoặc URL)
-            String path = listSongs.get(position).getPath();
+            String path = listSongs.get(position).getFileUrl();
             uri = Uri.parse(path);
 
             // 3. Quản lý MediaPlayer
@@ -372,9 +372,6 @@ public class PlayerActivity extends AppCompatActivity {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {
             retriever.setDataSource(this, uri);
-
-            long durationMs = Long.parseLong(listSongs.get(position).getDuration());
-            duration_total.setText(formattedTime((int) (durationMs / 1000)));
 
             byte[] art = retriever.getEmbeddedPicture();
             Bitmap bitmap;

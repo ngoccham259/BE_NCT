@@ -65,7 +65,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MyViewHolder
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         // 1. Hiển thị dữ liệu bài hát
         holder.file_name.setText(mfiles.get(position).getTitle());
-        byte[] image = getAlbumArt(mfiles.get(position).getPath());
+        byte[] image = getAlbumArt(mfiles.get(position).getFileUrl());
         if (image != null) {
             Glide.with(mContext).asBitmap().load(image).into(holder.album_art);
         } else {
@@ -108,7 +108,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MyViewHolder
 
         Uri contentUri = ContentUris.withAppendedId(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                Long.parseLong(mfiles.get(position).getId())
+                mfiles.get(position).getId()
         );
 
         if (mContext instanceof MainActivity) {
