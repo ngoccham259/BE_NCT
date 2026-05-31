@@ -7,8 +7,8 @@ public class UserManager {
 
     static {
         // Tài khoản mẫu
-        allUsers.add(new User("admin", "admin", "admin", "admin@gmail.com"));
-        allUsers.add(new User("khachhang", "123", "user", "user@gmail.com"));
+        allUsers.add(new User(1,"admin", "admin", "admin", "admin@gmail.com"));
+        allUsers.add(new User(1,"khachhang", "123", "user", "user@gmail.com"));
     }
 
     public static User login(String username, String password) {

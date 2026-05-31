@@ -111,7 +111,8 @@ public class UserAdminFragment extends Fragment implements AdminUserAdapter.OnUs
 
             if (user == null) {
                 // Thêm mới
-                User newUser = new User(username, password, role, email);
+                int id = (int) (System.currentTimeMillis() / 1000);
+                User newUser = new User(id,username, password, role, email);
                 UserManager.addUser(newUser);
                 Toast.makeText(getContext(), "Đã thêm người dùng", Toast.LENGTH_SHORT).show();
             } else {

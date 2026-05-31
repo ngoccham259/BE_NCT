@@ -7,7 +7,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class DangNhapActivity extends AppCompatActivity {
     private EditText edtUsername, edtPassword;
@@ -27,31 +35,37 @@ public class DangNhapActivity extends AppCompatActivity {
                 String userStr = edtUsername.getText().toString().trim();
                 String passStr = edtPassword.getText().toString().trim();
 
-                if (userStr.isEmpty() || passStr.isEmpty()) {
-                    Toast.makeText(DangNhapActivity.this, "Vui lòng nhập tài khoản và mật khẩu", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+                DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
 
-                User user = UserManager.login(userStr, passStr);
+                usersRef.orderByChild("username").equalTo(userStr).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                                User user = userSnapshot.getValue(User.class);
+                                if (user != null && user.getPassword().equals(passStr)) {
+                                    Toast.makeText(DangNhapActivity.this, "Chào mừng " + user.getUsername(), Toast.LENGTH_SHORT).show();
 
-                if (user != null) {
-                    if (user.getRole().equals("admin")) {
-                        // Nếu là admin, vào trang quản lý Admin
-                        Intent intent = new Intent(DangNhapActivity.this, AdminActivity.class);
-                        startActivity(intent);
-                        finish();
-                    } else {
-                        // Nếu là khách hàng, vào trang chủ người dùng
-                        Intent intent = new Intent(DangNhapActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
+                                    if ("ADMIN".equals(user.getRole())) {
+                                        startActivity(new Intent(DangNhapActivity.this, AdminActivity.class));
+                                    } else {
+                                        startActivity(new Intent(DangNhapActivity.this, MainActivity.class));
+                                    }
+                                    finish();
+                                    return;
+                                }
+                            }
+                            Toast.makeText(DangNhapActivity.this, "Sai mật khẩu!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(DangNhapActivity.this, "Tài khoản không tồn tại!", Toast.LENGTH_SHORT).show();
+                        }
                     }
-                } else {
-                    Toast.makeText(DangNhapActivity.this, "Sai tài khoản hoặc mật khẩu", Toast.LENGTH_SHORT).show();
-                }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {}
+                });
             }
         });
-
         TextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
         tvForgotPassword.setOnClickListener(new View.OnClickListener() {
             @Override
