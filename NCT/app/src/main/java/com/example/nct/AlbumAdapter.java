@@ -35,30 +35,34 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.MyHolder> {
         return new MyHolder(view);
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull MyHolder holder, @SuppressLint("RecyclerView") int position) {
-        MusicFiles albumFile = albumFiles.get(position);
 
+    @Override
+    public void onBindViewHolder(@NonNull MyHolder holder, int position) {
+        MusicFiles albumFile = albumFiles.get(position);
         holder.album_name.setText(albumFile.getAlbum());
 
-        Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
-        Uri albumArtUri = android.content.ContentUris.withAppendedId(sArtworkUri, albumFile.getAlbumId());
+        if (albumFile.getAlbum().equals("Yêu thích")) {
+            Glide.with(mContext)
+                    .load(R.drawable.favorite)
+                    .into(holder.album_image);
+        } else {
 
-        Glide.with(mContext)
-                .load(albumArtUri)
-                .placeholder(R.drawable.nct_logo)
-                .error(R.drawable.nct_logo)
-                .centerCrop()
-                .into(holder.album_image);
+            Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
+            Uri albumArtUri = android.content.ContentUris.withAppendedId(sArtworkUri, albumFile.getAlbumId());
 
+            Glide.with(mContext)
+                    .load(albumArtUri)
+                    .placeholder(R.drawable.nct_logo)
+                    .into(holder.album_image);
+        }
 
+        // Sự kiện click giữ nguyên để mở sang AlbumDetails
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(mContext, AlbumDetails.class);
             intent.putExtra("albumName", albumFile.getAlbum());
             mContext.startActivity(intent);
         });
     }
-
     @Override
     public int getItemCount() {
         return albumFiles.size();
