@@ -9,7 +9,8 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:theme="@style/CustomSearchViewStyle"
         />
-    <item android:id="@+id/admin_panel"
+    <item
+        android:id="@+id/admin_panel"
         android:title="Admin"
         android:icon="@drawable/person"
         app:showAsAction="always" />

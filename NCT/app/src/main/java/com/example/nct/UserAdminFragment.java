@@ -64,7 +64,7 @@ public class UserAdminFragment extends Fragment implements AdminUserAdapter.OnUs
         String targetRole = (position == 0) ? "admin" : "user";
         ArrayList<User> filteredList = new ArrayList<>();
         for (User user : UserManager.allUsers) {
-            if (user.getRole().equals(targetRole)) {
+            if (user.getRole().equalsIgnoreCase(targetRole)) {
                 filteredList.add(user);
             }
         }
@@ -79,7 +79,8 @@ public class UserAdminFragment extends Fragment implements AdminUserAdapter.OnUs
         TextView tvTitle = dialogView.findViewById(R.id.tv_dialog_user_title);
         EditText etUsername = dialogView.findViewById(R.id.et_user_username);
         EditText etEmail = dialogView.findViewById(R.id.et_user_email);
-        EditText etPassword = dialogView.findViewById(R.id.et_user_password);
+
+        EditText etPassword = dialogView.findViewById(R.id.et_user_password);        
         Spinner spinnerRole = dialogView.findViewById(R.id.spinner_user_role);
 
         String[] roles = {"admin", "user"};
@@ -91,8 +92,9 @@ public class UserAdminFragment extends Fragment implements AdminUserAdapter.OnUs
             tvTitle.setText("Sửa người dùng");
             etUsername.setText(user.getUsername());
             etEmail.setText(user.getEmail());
+
             etPassword.setText(user.getPassword());
-            spinnerRole.setSelection(user.getRole().equals("admin") ? 0 : 1);
+            spinnerRole.setSelection(user.getRole().equalsIgnoreCase("admin") ? 0 : 1);
         }
 
         AlertDialog dialog = builder.create();
@@ -104,23 +106,24 @@ public class UserAdminFragment extends Fragment implements AdminUserAdapter.OnUs
             String password = etPassword.getText().toString().trim();
             String role = spinnerRole.getSelectedItem().toString();
 
-            if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            if (username.isEmpty() || email.isEmpty() || password.isEmpty() ) {
                 Toast.makeText(getContext(), "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             if (user == null) {
-                // Thêm mới
+                // Thêm mới - Tạo ID ngẫu nhiên từ timestamp
                 int id = (int) (System.currentTimeMillis() / 1000);
-                User newUser = new User(id,username, password, role, email);
-                UserManager.addUser(newUser);
+                User newUser = new User(id, username, password, role, email);
+                UserManager.addUser(newUser); // Lưu lên Firebase
                 Toast.makeText(getContext(), "Đã thêm người dùng", Toast.LENGTH_SHORT).show();
             } else {
-                // Sửa
+                // Sửa thông tin
                 user.setUsername(username);
                 user.setEmail(email);
                 user.setPassword(password);
                 user.setRole(role);
+                UserManager.addUser(user); // Cập nhật lên Firebase
                 Toast.makeText(getContext(), "Đã cập nhật", Toast.LENGTH_SHORT).show();
             }
             filterUsers(tabLayout.getSelectedTabPosition());
@@ -141,7 +144,7 @@ public class UserAdminFragment extends Fragment implements AdminUserAdapter.OnUs
                 .setTitle("Xóa người dùng")
                 .setMessage("Bạn có chắc chắn muốn xóa " + user.getUsername() + "?")
                 .setPositiveButton("Xóa", (dialog, which) -> {
-                    UserManager.allUsers.remove(user);
+                    UserManager.deleteUser(user); // Xóa trên cả Firebase
                     filterUsers(tabLayout.getSelectedTabPosition());
                     Toast.makeText(getContext(), "Đã xóa", Toast.LENGTH_SHORT).show();
                 })
