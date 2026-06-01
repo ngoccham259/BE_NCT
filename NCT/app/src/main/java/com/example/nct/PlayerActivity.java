@@ -422,6 +422,7 @@ public class PlayerActivity extends AppCompatActivity {
 
                 // Metadata
                 MetaData(uri);
+                checkIsFavorite(listSongs.get(position));
             });
 
             mediaPlayer.setOnCompletionListener(mp -> nextBtnClicked());
@@ -510,14 +511,12 @@ public class PlayerActivity extends AppCompatActivity {
         }
     }
     private void checkIsFavorite(MusicFiles song) {
-        if (MainActivity.currentUser == null) return;
+        if (MainActivity.currentUser == null || song == null || song.getId() == null) return;
 
-        // Đường dẫn: favorites -> userId -> songId
         favoriteRef = FirebaseDatabase.getInstance().getReference("favorites")
                 .child(String.valueOf(MainActivity.currentUser.getId()))
                 .child(String.valueOf(song.getId()));
 
-        // Lắng nghe sự thay đổi trạng thái
         favoriteRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -526,6 +525,7 @@ public class PlayerActivity extends AppCompatActivity {
                     isFav = true;
                 } else {
                     favoriteBtn.setImageResource(R.drawable.favorite_borde);
+                    favoriteBtn.setColorFilter(android.graphics.Color.WHITE);
                     isFav = false;
                 }
             }

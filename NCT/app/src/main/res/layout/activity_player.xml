@@ -113,7 +113,7 @@
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:padding="5dp"
-            android:src="@drawable/favorite"
+            android:src="@drawable/favorite_borde"
             app:tint="#FFFFFF" />
     </RelativeLayout>
 

@@ -10,36 +10,39 @@ public class MusicFiles {
 
     private String album;
 
-    // URL cho nhạc online
+
     private String fileUrl;
 
-    // Đường dẫn cho nhạc offline
+
     private String path;
 
     private long albumId;
+    private boolean isFavorite;
 
     // Constructor rỗng
     public MusicFiles() {
     }
 
     // Constructor cho nhạc online
-    public MusicFiles(Long id, String title, String artist, String album, String fileUrl, long albumId) {
 
+    public MusicFiles(Long id, String title, String artist, String album, String fileUrl, String path, long albumId, boolean isFavorite) {
         this.id = id;
         this.title = title;
         this.artist = artist;
         this.album = album;
         this.fileUrl = fileUrl;
+        this.path = path;
         this.albumId = albumId;
+        this.isFavorite = isFavorite;
     }
-
-    public MusicFiles(String path, String title, String artist, String album, long albumId) {
+    public MusicFiles(String path, String title, String artist, String album, long albumId, boolean isFavorite) {
 
         this.path = path;
         this.title = title;
         this.artist = artist;
         this.album = album;
         this.albumId = albumId;
+        this.isFavorite=isFavorite;
     }
 
 
@@ -109,5 +112,13 @@ public class MusicFiles {
 
     public void setAlbumId(long albumId) {
         this.albumId = albumId;
+    }
+
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
     }
 }

@@ -116,8 +116,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         ViewPager viewPager = findViewById(R.id.viewpape);
         TabLayout tabLayout  = findViewById((R.id.tab_layout));
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-        viewPagerAdapter.addFragments(new OnlineSongsFragment(), "Cloud");
-        viewPagerAdapter.addFragments(new SongsFragment(), "Songs");
+        viewPagerAdapter.addFragments(new OnlineSongsFragment(), "Online");
+        viewPagerAdapter.addFragments(new SongsFragment(), "Offline");
         viewPagerAdapter.addFragments(new AlbumFragment(), "Albums");
         viewPager.setAdapter(viewPagerAdapter);
         tabLayout.setupWithViewPager(viewPager);
@@ -246,18 +246,25 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
             cursor.close();
             MusicFiles favoriteAlbum = new MusicFiles();
+
             favoriteAlbum.setAlbum("Yêu thích");
+
+            favoriteAlbum.setTitle("Yêu thích");
+
             favoriteAlbum.setArtist("Của bạn");
+
             favoriteAlbum.setPath("firebase");
 
             boolean isExist = false;
             for (MusicFiles f : albums) {
-                if (f.getAlbum().equals("Yêu thích")) {
+                if ("Yêu thích".equals(f.getAlbum())) {
                     isExist = true;
                     break;
                 }
             }
-
+            if (!isExist) {
+                albums.add(favoriteAlbum);
+            }
         }
 
         return tempAudioList;

@@ -111,7 +111,8 @@ public class SongAdminFragment extends Fragment implements AdminMusicAdapter.OnS
                 // THÊM MỚI: Tạo một key tự động (ID)
                 String idStr = String.valueOf(System.currentTimeMillis());
                 String id = String.valueOf(System.currentTimeMillis());
-                MusicFiles newSong = new MusicFiles(Long.parseLong(id), title, artist, album, url, 0L);
+                MusicFiles newSong =
+                        new MusicFiles(Long.parseLong(id), title, artist, album, url, "", 0L);
                 mDatabase.child(id).setValue(newSong);
                 Toast.makeText(getContext(), "Đã thêm vào Firebase", Toast.LENGTH_SHORT).show();
             } else {
