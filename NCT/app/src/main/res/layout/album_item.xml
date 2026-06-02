@@ -6,24 +6,26 @@
     app:cardCornerRadius="10dp"
     app:cardElevation="10dp"
     android:layout_height="200dp"
-    android:layout_margin="10dp">
+    android:layout_margin="10dp"
+    app:cardBackgroundColor="@android:color/black">
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorPrimary"
+        android:background="@android:color/black"
         android:id="@+id/relative_layout">
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="170dp"
             android:id="@+id/album_img"
-            android:src="@mipmap/ic_launcher"/>
+            android:src="@mipmap/ic_launcher"
+            android:scaleType="centerCrop"/>
         <TextView
             android:layout_width="140dp"
             android:layout_height="wrap_content"
             android:id="@+id/album_name"
             android:layout_alignParentBottom="true"
             android:text="Album"
-            android:textColor="#fff"
+            android:textColor="@android:color/white"
             android:singleLine="true"
             android:gravity="center_horizontal"
             android:layout_marginBottom="10dp"
@@ -32,6 +34,4 @@
             android:textStyle="bold"/>
 
     </RelativeLayout>
-
-
 </androidx.cardview.widget.CardView>

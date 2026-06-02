@@ -4,5 +4,5 @@
     <color name="colorAccent">#FFFFFFFF</color>
     <color name="colorPrimary">#1B1A1C</color>
     <color name="colorPrimaryDark">#151515</color>
-
+    <color name="colorAdminGreen">#00897B</color>
 </resources>
