@@ -26,6 +26,8 @@ public class UserAdminFragment extends Fragment implements AdminUserAdapter.OnUs
     private TabLayout tabLayout;
     private FloatingActionButton fabAdd;
 
+
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -34,6 +36,7 @@ public class UserAdminFragment extends Fragment implements AdminUserAdapter.OnUs
         recyclerView = view.findViewById(R.id.rv_admin_users);
         tabLayout = view.findViewById(R.id.tab_layout_users);
         fabAdd = view.findViewById(R.id.fab_add_user);
+
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new AdminUserAdapter(getContext(), new ArrayList<>(), this);
@@ -80,7 +83,7 @@ public class UserAdminFragment extends Fragment implements AdminUserAdapter.OnUs
         EditText etUsername = dialogView.findViewById(R.id.et_user_username);
         EditText etEmail = dialogView.findViewById(R.id.et_user_email);
 
-        EditText etPassword = dialogView.findViewById(R.id.et_user_password);        
+        EditText etPassword = dialogView.findViewById(R.id.et_user_password);
         Spinner spinnerRole = dialogView.findViewById(R.id.spinner_user_role);
 
         String[] roles = {"admin", "user"};
