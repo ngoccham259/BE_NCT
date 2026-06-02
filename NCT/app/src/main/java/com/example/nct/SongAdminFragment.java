@@ -94,6 +94,7 @@ public class SongAdminFragment extends Fragment implements AdminMusicAdapter.OnS
         }
 
         AlertDialog dialog = builder.create();
+        dialogView.findViewById(R.id.btn_cancel).setOnClickListener(v -> dialog.dismiss());
 
         dialogView.findViewById(R.id.btn_save).setOnClickListener(v -> {
             String title = etTitle.getText().toString().trim();
