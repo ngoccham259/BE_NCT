@@ -12,6 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
+
 public class SongsFragment extends Fragment {
 
    RecyclerView recyclerView;
@@ -41,5 +43,20 @@ public class SongsFragment extends Fragment {
             }
         }
         return view;
+    }
+    public void filter(String text) {
+
+        ArrayList<MusicFiles> filtered = new ArrayList<>();
+
+        for (MusicFiles song : MainActivity.musicFiles) {
+
+            if (song.getTitle() != null &&
+                    song.getTitle().toLowerCase().contains(text)) {
+
+                filtered.add(song);
+            }
+        }
+
+        musicAdapter.updateList(filtered);
     }
 }

@@ -53,6 +53,9 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     public static ArrayList<MusicFiles> onlineMusicFiles = new ArrayList<>();
     private String MY_SORT_PREF = "SortOrder";
     public static User currentUser;
+    ViewPager  viewPager;
+    private OnlineSongsFragment onlineFragment;
+    private SongsFragment songsFragment;
 
 
     @Override
@@ -72,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
     }
     private void permission() {
 
@@ -112,16 +116,23 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         }
     }
 
-    private void initViewPager(){
-        ViewPager viewPager = findViewById(R.id.viewpape);
-        TabLayout tabLayout  = findViewById((R.id.tab_layout));
-        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-        viewPagerAdapter.addFragments(new OnlineSongsFragment(), "Online");
-        viewPagerAdapter.addFragments(new SongsFragment(), "Offline");
+    private void initViewPager() {
+
+        viewPager = findViewById(R.id.viewpape);
+        TabLayout tabLayout = findViewById(R.id.tab_layout);
+
+        ViewPagerAdapter viewPagerAdapter =
+                new ViewPagerAdapter(getSupportFragmentManager());
+
+        onlineFragment = new OnlineSongsFragment();
+        songsFragment = new SongsFragment();
+
+        viewPagerAdapter.addFragments(onlineFragment, "Online");
+        viewPagerAdapter.addFragments(songsFragment, "Offline");
         viewPagerAdapter.addFragments(new AlbumFragment(), "Albums");
+
         viewPager.setAdapter(viewPagerAdapter);
         tabLayout.setupWithViewPager(viewPager);
-
     }
 
 
@@ -364,19 +375,31 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        String useInput=newText.toLowerCase();
-        ArrayList<MusicFiles>myFiles = new ArrayList<>();
-        if (musicFiles != null) {
-            for (MusicFiles song : musicFiles) {
-                if (song.getTitle().toLowerCase().contains(useInput)) {
-                    myFiles.add(song);
+
+        String query = newText.toLowerCase().trim();
+
+        int currentTab = viewPager.getCurrentItem();
+
+        if (currentTab == 0 && onlineFragment != null) {
+            onlineFragment.filter(query);
+        } else if (currentTab == 1 && songsFragment != null) {
+            songsFragment.filter(query);
+        }
+
+        return true;
+    }
+    private void filterSearch(ArrayList<MusicFiles> listToFilter, String query) {
+        ArrayList<MusicFiles> filteredList = new ArrayList<>();
+        if (listToFilter != null) {
+            for (MusicFiles song : listToFilter) {
+                if (song.getTitle().toLowerCase().contains(query)) {
+                    filteredList.add(song);
                 }
             }
         }
         if (musicAdapter != null) {
-            musicAdapter.updateList(myFiles);
+            musicAdapter.updateList(filteredList);
         }
-        return true;
     }
 
     @Override

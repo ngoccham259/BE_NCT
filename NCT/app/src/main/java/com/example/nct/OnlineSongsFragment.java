@@ -9,6 +9,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+
 public class OnlineSongsFragment extends Fragment {
 
     RecyclerView recyclerView;
@@ -38,5 +40,20 @@ public class OnlineSongsFragment extends Fragment {
         recyclerView.setAdapter(musicAdapter);
 
         return view;
+    }
+    public void filter(String text) {
+
+        ArrayList<MusicFiles> filtered = new ArrayList<>();
+
+        for (MusicFiles song : MainActivity.onlineMusicFiles) {
+
+            if (song.getTitle() != null &&
+                    song.getTitle().toLowerCase().contains(text)) {
+
+                filtered.add(song);
+            }
+        }
+
+        musicAdapter.updateList(filtered);
     }
 }
